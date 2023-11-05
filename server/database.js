@@ -41,4 +41,9 @@ const initializeDBSchema = async () => {
   await executeSQL(messageTableQuery);
 };
 
-module.exports = { executeSQL, initializeMariaDB, initializeDBSchema };
+const initializeDB = async () => {
+  initializeMariaDB();
+  await initializeDBSchema();
+};
+
+module.exports = { executeSQL, initializeDB };

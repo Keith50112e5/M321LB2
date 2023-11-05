@@ -1,56 +1,36 @@
-const express = require("express");
-const http = require("http");
-var livereload = require("livereload");
-var connectLiveReload = require("connect-livereload");
-const { initializeWebsocketServer } = require("./server/websocketserver");
-const { initializeAPI } = require("./server/api");
-const {
-  initializeMariaDB,
-  initializeDBSchema,
-  executeSQL,
-} = require("./server/database");
-
-// Create the express server
-const app = express();
-const server = http.createServer(app);
+require("dotenv").config();
+const express = require("express"),
+  app = express(),
+  server = require("http").createServer(app), // Create the express server
+  serverPort = process.env.PORT || 3000,
+  env = process.env.NODE_ENV || "development",
+  listenOn = `Express Server started on http://localhost:${serverPort}/ as '${env}' Environment`,
+  liveReloadServer = require("livereload").createServer(),
+  { initializeDB, executeSQL } = require("./server/database");
 
 // create a livereload server
-const env = process.env.NODE_ENV || "development";
 if (env !== "production") {
-  const liveReloadServer = livereload.createServer();
-  liveReloadServer.server.once("connection", () => {
-    setTimeout(() => {
-      liveReloadServer.refresh("/");
-    }, 100);
-  });
+  const lrsRefresh = () => setTimeout(() => liveReloadServer.refresh("/"), 100);
+  liveReloadServer.server.once("connection", lrsRefresh);
   // use livereload middleware
-  app.use(connectLiveReload());
+  app.use(require("connect-livereload")());
 }
+
+app.use(express.json());
 
 // deliver static files from the client folder like css, js, images
 app.use(express.static("client"));
 // route for the homepage
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/client/index.html");
-});
-// Initialize the websocket server
-initializeWebsocketServer(server);
-// Initialize the REST api
-initializeAPI(app);
+app.get("/", (req, res) => res.sendFile(__dirname + "/client/index.html"));
 
-// Allowing top-level await
-(async function () {
-  // Initialize the database
-  initializeMariaDB();
-  await initializeDBSchema();
-  // TODO: REMOVE!!!! test the database connection
-  const result = await executeSQL("SELECT * FROM users;");
-  console.log(result);
-  //start the web server
-  const serverPort = process.env.PORT || 3000;
-  server.listen(serverPort, () => {
-    console.log(
-      `Express Server started on port ${serverPort} as '${env}' Environment`
-    );
-  });
-})();
+// Initialize the websocket server
+require("./server/wss")(server);
+
+// Initialize the REST api
+app.use("/api", require("./server/api"));
+
+// Initialize the database
+initializeDB().catch((err) => console.error(err));
+
+//start the web server
+server.listen(serverPort, () => console.log(listenOn));

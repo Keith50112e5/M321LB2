@@ -1,10 +1,7 @@
-const initializeAPI = (app) => {
-  // default REST api endpoint
-  app.get("/api/hello", hello);
-};
+const api = require("express").Router();
 
-const hello = (req, res) => {
-  res.send("Hello World!");
-};
+api.get("/hello", (req, res) => {
+  res.json("Hello World!");
+});
 
-module.exports = { initializeAPI };
+module.exports = api;
