@@ -31,6 +31,11 @@ const initializeDBSchema = async () => {
     PRIMARY KEY (id)
   );`;
   await executeSQL(userTableQuery);
+  const userSeed = `INSERT INTO users (name) VALUES
+  ('john'),
+  ('jane');`;
+  const checkUsers = await executeSQL(`SELECT * FROM users;`);
+  if (checkUsers.length < 1) await executeSQL(userSeed);
   const messageTableQuery = `CREATE TABLE IF NOT EXISTS messages (
     id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,

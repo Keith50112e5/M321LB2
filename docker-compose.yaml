@@ -4,8 +4,6 @@ services:
   mariadb:
     image: mariadb:11.1.2
     command: "--default-authentication-plugin=mysql_native_password"
-    volumes:
-      - m321_project_mariadb:/var/lib/mysql
     restart: always
     env_file:
       - docker.env
@@ -22,5 +20,11 @@ services:
     ports:
       - 9200:80
 
-volumes:
-  m321_project_mariadb:
+  # nodejs:
+  #   build:
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - mariadb
+  #   ports:
+  #     - 3000:3000
+  #   restart: always

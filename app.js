@@ -2,11 +2,11 @@ require("dotenv").config();
 const express = require("express"),
   app = express(),
   server = require("http").createServer(app), // Create the express server
-  serverPort = process.env.PORT || 3000,
   env = process.env.NODE_ENV || "development",
+  serverPort = process.env.PORT || 3000,
   listenOn = `Express Server started on http://localhost:${serverPort}/ as '${env}' Environment`,
   liveReloadServer = require("livereload").createServer(),
-  { initializeDB, executeSQL } = require("./server/database");
+  { initializeDB } = require("./server/database");
 
 // create a livereload server
 if (env !== "production") {
@@ -20,6 +20,7 @@ app.use(express.json());
 
 // deliver static files from the client folder like css, js, images
 app.use(express.static("client"));
+
 // route for the homepage
 app.get("/", (req, res) => res.sendFile(__dirname + "/client/index.html"));
 

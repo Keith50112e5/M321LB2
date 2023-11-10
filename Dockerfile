@@ -2,16 +2,13 @@
 FROM node:18
 
 # Set the working directory inside the container
-WORKDIR ...
+WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the container
-COPY ...
+# Copy the all files to the container
+COPY . ./
 
 # Install the dependencies
-RUN ...
-
-# Copy the source code to the container
-COPY ...
+RUN npm i
 
 # Start the server when the container starts
-CMD ...
+CMD npm start
