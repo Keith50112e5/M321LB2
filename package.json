@@ -1,12 +1,12 @@
 {
   "name": "321-project-starter",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "src/app.js",
   "license": "MIT",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon --ext js,css,html",
-    "prod": "NODE_ENV=production node app.js"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js --ext js,css,html",
+    "prod": "NODE_ENV=production node src/app.js"
   },
   "dependencies": {
     "aes-encryption": "^1.0.4",

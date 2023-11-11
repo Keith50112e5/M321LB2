@@ -12,7 +12,6 @@ api.post("/login", async (req, res) => {
 
   const { id } = user[0];
   const token = jwt.sign({ id, name });
-  console.log(token);
   res.json({ token });
 });
 
