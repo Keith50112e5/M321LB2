@@ -11,11 +11,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const name = inputName.value;
 
     const body = JSON.stringify({ name });
-    const res = await fetch("/api/login", {
-      method,
-      headers,
-      body,
-    });
+
+    const res = await fetch("/api/login", { method, headers, body });
 
     const { token, err } = await res.json();
     if (err) return (errorBox.innerHTML = err);

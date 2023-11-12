@@ -4,6 +4,8 @@ const jwtSecret = process.env.JWT_SECRET || "secret";
 
 const sign = (data) => jwt.sign(data, jwtSecret, { expiresIn: "1h" });
 
+const verify = (token) => jwt.verify(token, jwtSecret);
+
 const verifyMiddleware = (req, res, next) => {
   const authorization = req.headers.authorization;
 
@@ -19,7 +21,7 @@ const verifyMiddleware = (req, res, next) => {
 
   if (prefix !== "Bearer") return sendError("Invalid authorization prefix.");
 
-  const tokenValidation = jwt.verify(token, jwtSecret);
+  const tokenValidation = verify(token);
 
   if (!tokenValidation?.data) return sendError("Invalid token.");
 
@@ -27,4 +29,4 @@ const verifyMiddleware = (req, res, next) => {
 
   return next();
 };
-module.exports = { sign, verifyMiddleware };
+module.exports = { sign, verify, verifyMiddleware };

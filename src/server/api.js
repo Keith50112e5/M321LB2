@@ -15,6 +15,4 @@ api.post("/login", async (req, res) => {
   res.json({ token });
 });
 
-api.get("/room", (req, res) => {});
-
 module.exports = api;

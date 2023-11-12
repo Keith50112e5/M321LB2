@@ -1,0 +1,12 @@
+#login {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  border: solid;
+  padding: 50px;
+}
+#name {
+  height: 40px;
+  width: 200px;
+  margin-top: 20px;
+}
