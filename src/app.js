@@ -9,12 +9,12 @@ const express = require("express"),
   { initializeDB } = require("./server/database");
 
 // create a livereload server
-if (env !== "production") {
-  const lrsRefresh = () => setTimeout(() => liveReloadServer.refresh("/"), 100);
-  liveReloadServer.server.once("connection", lrsRefresh);
-  // use livereload middleware
-  app.use(require("connect-livereload")());
-}
+// if (env !== "production") {
+//   const lrsRefresh = () => setTimeout(() => liveReloadServer.refresh("/"), 100);
+//   liveReloadServer.server.once("connection", lrsRefresh);
+//   // use livereload middleware
+//   app.use(require("connect-livereload")());
+// }
 
 app.use(express.json());
 

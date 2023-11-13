@@ -11,7 +11,8 @@ api.post("/login", async (req, res) => {
     return res.json({ err: "User doesn't exist" }).status(400);
 
   const { id } = user[0];
-  const token = jwt.sign({ id, name });
+  const data = { id, name };
+  const token = jwt.sign({ data });
   res.json({ token });
 });
 

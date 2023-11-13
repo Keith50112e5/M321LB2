@@ -3,8 +3,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const inputMessage = byId("msg");
   const messageBox = byId("msgs");
   const sendMessage = byId("send");
+  const chatters = byId("chatters");
 
   const { log, error } = console;
+  const { parse, stringify } = JSON;
   const token = sessionStorage.getItem("chat_jwt");
 
   if (!token) return (window.location.href = "/login.html");
@@ -15,8 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   sendMessage.addEventListener("click", () => {
     const { value } = inputMessage;
-    log({ authorization, value });
-    socket.send(JSON.stringify({ authorization, value }));
+    socket.send(stringify({ authorization, value }));
   });
 
   socket.addEventListener("message", (e) => {
@@ -25,22 +26,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       sessionStorage.clear();
       return (window.location.href = "/login.html");
     }
-    log(data);
-    const html = data
-      .map(
-        (entry) => `
-    <div id="message">
-    <div>${entry.name}</div><div>${entry.message}</div>
-    </div>
-    `
-      )
-      .join("");
-    messageBox.innerHTML = html;
+    const { chatInit, userInit, chat, users } = data;
+    if (!!userInit) {
+      const html = userInit
+        .map((entry) => `<div id="message">${entry.name}</div>`)
+        .join("");
+      chatters.innerHTML = html;
+    }
+    if (!!chatInit) {
+      const html = chatInit
+        .map(
+          (entry) => `<div id="message">
+          <b>${entry.name}</b><div>${entry.message}</div>
+          </div>`
+        )
+        .join("");
+      messageBox.innerHTML = html;
+    }
+    if (!!chat) {
+      messageBox.innerHTML += `<div id="message">
+      <b>${chat.name}</b><div>${chat.value}</div>
+      </div>`;
+    }
   });
 
-  socket.addEventListener("open", (e) => log("WS connected!"));
+  socket.addEventListener("open", (e) => {
+    log("WS connected!");
+    socket.send(stringify({ authorization }));
+  });
 
-  socket.addEventListener("close", (e) => log("WS closed."));
+  socket.addEventListener("close", (e) => {
+    log("WS closed.");
+  });
 
   socket.addEventListener("error", (e) => error("WS error:", e));
 });
