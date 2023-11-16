@@ -3,6 +3,7 @@ docker-compose.yaml
 Dockerfile
 docker.env
 README.md
+.env
 .gitignore
 .vscode
 .idea
