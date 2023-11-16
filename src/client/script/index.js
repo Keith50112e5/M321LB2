@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   sendMessage.addEventListener("click", () => {
     const { value } = inputMessage;
-    socket.send(stringify({ authorization, value }));
+    inputMessage.value = "";
+    socket.send(stringify({ type: "message", authorization, value }));
   });
 
   socket.addEventListener("message", (e) => {
@@ -26,11 +27,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       sessionStorage.clear();
       return (window.location.href = "/login.html");
     }
-    const { chatInit, userInit, chat, users } = data;
-    if (!!userInit) {
-      const html = userInit
-        .map((entry) => `<div id="message">${entry.name}</div>`)
-        .join("");
+    const { chatInit, active, chat } = data;
+    if (!!active) {
+      const html =
+        "<p>chatters:</p>" +
+        active.map((user) => `<div id="message">${user}</div>`).join("");
       chatters.innerHTML = html;
     }
     if (!!chatInit) {
@@ -52,7 +53,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   socket.addEventListener("open", (e) => {
     log("WS connected!");
-    socket.send(stringify({ authorization }));
+    setTimeout(
+      () => socket.send(stringify({ type: "activate", authorization })),
+      100
+    );
   });
 
   socket.addEventListener("close", (e) => {

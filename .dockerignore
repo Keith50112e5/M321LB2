@@ -1,6 +1,7 @@
 node_modules
 docker-compose.yaml
 Dockerfile
+docker.env
 README.md
 .gitignore
 .vscode

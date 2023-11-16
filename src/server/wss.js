@@ -4,16 +4,15 @@ const { stringify, parse } = JSON;
 const WS = require("ws");
 let wss;
 
-const all10min = () => Math.round(Date.now() / 1000 / 60 / 2);
+let active = [];
+
+const everyMin = (min) => Math.round(Date.now() / 1000 / 60 / min);
 
 // Initialize the websocket server
 const wssInit = (server) => {
   wss = new WS.Server({ server });
   wss.on("connection", onConn);
 };
-
-const userInit = async () =>
-  await executeSQL(`SELECT name FROM users WHERE active > ${all10min()};`);
 
 // If a new connection is established, the onConnection function is called
 const onConn = async (ws) => {
@@ -22,7 +21,8 @@ const onConn = async (ws) => {
   const chatInit = await executeSQL(
     "SELECT name,message FROM messages,users WHERE users.id=messages.user_id;"
   );
-  jsonSend(ws, { chatInit, userInit: await userInit() });
+
+  jsonSend(ws, { chatInit });
 
   ws.on("message", onMessage(ws));
 };
@@ -30,25 +30,35 @@ const onConn = async (ws) => {
 // If a new message is received, the onMessage function is called
 const onMessage = (ws) => async (buffer) => {
   const message = buffer.toString();
-  const { authorization, value } = parse(message);
+  const { authorization, value, type } = parse(message);
 
   const { data, err } = jwt.completeVerify(authorization);
   if (!!err) return jsonSend(ws, { err });
   const { id, name } = data;
 
-  if (!!value) {
+  if (type === "message") {
     await executeSQL(`INSERT INTO messages (user_id, message) VALUES
     (${id},"${value}");`);
 
-    wss.clients.forEach(
-      broadcast({ chat: { name, value }, userInit: await userInit() })
+    return wss.clients.forEach(
+      broadcast({
+        chat: { name, value },
+        active,
+      })
     );
+  } else if (type === "activate") {
+    ws.on("close", onClose(name));
+    active = [...active, name];
+    wss.clients.forEach(broadcast({ active }));
   }
-  await executeSQL(`UPDATE users SET active=${all10min() + 2} WHERE id=${id}`);
-  wss.clients.forEach(broadcast({ userInit: await userInit() }));
 };
 
-const broadcast = (message) => async (ws) => {
+const onClose = (name) => () => {
+  active = active.filter((value) => value !== name);
+  wss.clients.forEach(broadcast({ active }));
+};
+
+const broadcast = (message) => (ws) => {
   jsonSend(ws, message);
 };
 

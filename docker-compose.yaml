@@ -1,5 +1,4 @@
 version: "3.8"
-
 services:
   mariadb:
     image: mariadb:11.1.2
@@ -7,8 +6,14 @@ services:
     restart: always
     env_file:
       - src/docker.env
+    # volumes:
+    #   - db_data
     ports:
       - 3306:3306
+    # healthcheck:
+    #   test: ["CMD-SHELL", "mysqladmin ping"]
+    #   interval: 10s
+    #   retries: 5
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -28,3 +33,7 @@ services:
   #   ports:
   #     - 3000:3000
   #   restart: always
+  #   environment:
+  #     DB_HOST: mariadb
+# volumes:
+#   db_data:
