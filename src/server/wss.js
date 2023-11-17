@@ -19,7 +19,7 @@ const onConn = async (ws) => {
   jsonSend(ws, "New websocket connection");
 
   const chatInit = await executeSQL(
-    "SELECT name,message FROM messages,users WHERE users.id=messages.user_id;"
+    "SELECT users.name,messages.message FROM messages LEFT JOIN users ON messages.user_id=users.id;"
   );
 
   jsonSend(ws, { chatInit });
@@ -35,8 +35,11 @@ const onMessage = (ws) => async (buffer) => {
   const { data, err } = jwt.completeVerify(authorization);
   if (!!err) return jsonSend(ws, { err });
   const { id, name } = data;
-
-  if (type === "message") {
+  if (type === "activate") {
+    ws.on("close", onClose(name));
+    active = [...active, name];
+    wss.clients.forEach(broadcast({ active }));
+  } else if (type === "message") {
     await executeSQL(`INSERT INTO messages (user_id, message) VALUES
     (${id},"${value}");`);
 
@@ -46,15 +49,29 @@ const onMessage = (ws) => async (buffer) => {
         active,
       })
     );
-  } else if (type === "activate") {
-    ws.on("close", onClose(name));
-    active = [...active, name];
-    wss.clients.forEach(broadcast({ active }));
+  } else if (type === "rename") {
+    await executeSQL(`UPDATE users SET name="${value}" WHERE id=${id};`);
+    const data = { id, name: value };
+    const token = jwt.sign({ data });
+
+    active = active.map((user) => (user === name ? value : user));
+
+    const chatInit = await executeSQL(
+      "SELECT users.name,messages.message FROM messages LEFT JOIN users ON messages.user_id=users.id;"
+    );
+
+    return wss.clients.forEach(
+      broadcast({
+        chatInit,
+        active,
+        token,
+      })
+    );
   }
 };
 
 const onClose = (name) => () => {
-  active = active.filter((value) => value !== name);
+  active = active.filter((user) => user !== name);
   wss.clients.forEach(broadcast({ active }));
 };
 

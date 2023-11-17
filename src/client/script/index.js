@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const messageBox = byId("msgs");
   const sendMessage = byId("send");
   const chatters = byId("chatters");
+  const renameButton = byId("rename");
 
   const { log, error } = console;
   const { parse, stringify } = JSON;
@@ -14,6 +15,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authorization = "Bearer " + token;
 
   const socket = new WebSocket("ws://localhost:3000");
+
+  renameButton.addEventListener("click", () => {
+    const name = prompt("What's your new name?");
+    if (name.length < 1) return alert("Name can't be empty.");
+    const confirmName = confirm("Your new name is " + name);
+    if (!confirmName) return alert("Renaming canceled.");
+    socket.send(stringify({ type: "rename", authorization, value: name }));
+  });
 
   sendMessage.addEventListener("click", () => {
     const { value } = inputMessage;
@@ -48,6 +57,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       messageBox.innerHTML += `<div id="message">
       <b>${chat.name}</b><div>${chat.value}</div>
       </div>`;
+    }
+    if (!!token) {
+      sessionStorage.removeItem("chat_jwt");
+      sessionStorage.setItem("chat_jwt", token);
     }
   });
 
