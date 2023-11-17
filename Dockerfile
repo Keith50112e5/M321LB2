@@ -5,7 +5,7 @@ FROM node:18
 WORKDIR /app
 
 # Copy the all files to the container
-COPY . ./
+COPY . .
 
 # Install the dependencies
 RUN npm i

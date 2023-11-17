@@ -1,4 +1,3 @@
-require("dotenv").config();
 const express = require("express"),
   app = express(),
   server = require("http").createServer(app), // Create the express server
