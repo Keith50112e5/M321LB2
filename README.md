@@ -5,6 +5,11 @@
 - Docker
 - Node >= 18.x
 
+## User Credentials
+
+1. john
+1. jane
+
 ## Get Started
 
 ```bash
